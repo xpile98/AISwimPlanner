@@ -1,0 +1,573 @@
+<!DOCTYPE html><html><head><base href="https://swimplanner.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수영 운동 계획 만들기 - 수영 플래너</title>
+<style>
+  body {
+    font-family: 'Nanum Gothic', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #e0f7fa, #80deea);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background-color: #006064;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: #00838f;
+    margin: 0;
+  }
+  form {
+    background-color: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #006064;
+  }
+  select, input[type="number"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #b2ebf2;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  button {
+    background-color: #00838f;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+  }
+  button:hover {
+    background-color: #006064;
+  }
+  .focus-area-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 1rem;
+  }
+  .focus-area-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .focus-area-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .focus-area-option {
+    display: flex;
+    align-items: center;
+    background-color: #e0f7fa;
+    border-radius: 20px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  .focus-area-option:hover {
+    background-color: #b2ebf2;
+    transform: scale(1.05);
+  }
+  .focus-area-option input[type="checkbox"] {
+    display: none;
+  }
+  .focus-area-text {
+    font-size: 0.9rem;
+    color: #006064;
+    transition: color 0.3s ease;
+  }
+  .focus-area-option input[type="checkbox"]:checked + .focus-area-text {
+    font-weight: bold;
+    color: #00838f;
+  }
+  .focus-area-option input[type="checkbox"]:checked + .focus-area-text + .focus-area-option {
+    background-color: #4dd0e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .language-selector {
+    display: flex;
+    gap: 10px;
+  }
+  .language-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 5px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+  }
+  .language-btn:hover, .language-btn.active {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  .workout-plan {
+    background-color: white;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  #save-image-btn, #new-plan-btn {
+    margin-top: 1rem;
+  }
+  .detailed-drill-options {
+    display: none;
+    margin-top: 1rem;
+  }
+  .detailed-drill-options h4 {
+    margin-bottom: 0.5rem;
+  }
+  .detailed-drill-options ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  .detailed-drill-options li {
+    margin-bottom: 0.5rem;
+  }
+  .drill-settings-icon {
+    cursor: pointer;
+    font-size: 24px;
+    transition: transform 0.3s ease;
+  }
+  #total-distance-validation {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #e0f7fa;
+    border-radius: 4px;
+  }
+  #total-distance-input {
+    width: 100px;
+    margin-right: 10px;
+  }
+    .drill-settings-icon {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .drill-settings-icon:hover {
+      background-color: #b2ebf2;
+      transform: scale(1.05);
+    }
+    .drill-settings-text {
+      margin-left: 0.5rem;
+      font-size: 0.9rem;
+      color: #006064;
+    }
+    .drill-settings-icon.active {
+      background-color: #4dd0e1;
+    }
+    .drill-settings-icon.active .drill-settings-text {
+      font-weight: bold;
+    }
+</style>
+</head>
+<body>
+  <header>
+  <div style="flex: 1;"></div>
+  <h1 id="title">AI Swimming Workout</h1>
+  <div style="flex: 1;"></div>
+</header>
+  <main>
+    <form action="/generate" method="GET">
+      <label for="skill-level" id="skill-level-label">수영 등급:</label>
+      <select id="skill-level" name="skill-level" required="">
+        <option value="" id="skill-level-option-placeholder">수영 등급을 선택하세요</option>
+        <option value="1">1등급 (고급)</option>
+        <option value="2">2등급 (중상급)</option>
+        <option value="3">3등급 (중급)</option>
+        <option value="4">4등급 (초중급)</option>
+        <option value="5">5등급 (초보자)</option>
+      </select>
+
+      <label for="workout-type" id="workout-type-label">운동 유형:</label>
+      <select id="workout-type" name="workout-type" required="">
+        <option value="" id="workout-type-option-placeholder">운동 유형을 선택하세요</option>
+        <option value="time" id="workout-type-option-time" selected="">시간 기준</option>
+        <option value="distance" id="workout-type-option-distance">거리 기준</option>
+      </select>
+
+      <div id="time-input">
+        <label for="workout-duration" id="workout-duration-label">운동 시간 (분):</label>
+        <input type="number" id="workout-duration" name="workout-duration" min="15" max="180" step="5" value="50">
+      </div>
+
+      <div id="distance-input" style="display: none;">
+        <label for="workout-distance" id="workout-distance-label">운동 거리 (m):</label>
+        <input type="number" id="workout-distance" name="workout-distance" min="100" max="5000" step="100" value="1000">
+      </div>
+
+      <label for="pool-length" id="pool-length-label">풀 길이 (m):</label>
+      <select id="pool-length" name="pool-length" required="">
+        <option value="" id="pool-length-option-placeholder">풀 길이를 선택하세요</option>
+        <option value="25" selected="">25m</option>
+        <option value="50">50m</option>
+      </select>
+
+      <div class="focus-area-container">
+        <div class="focus-area-section">
+          <h4 id="training-goals-title">훈련 목표</h4>
+          <div class="focus-area-options">
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="endurance">
+              <span class="focus-area-text" id="focus-area-endurance">🏃 지구력</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="strength">
+              <span class="focus-area-text" id="focus-area-strength">💪 체력</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="speed">
+              <span class="focus-area-text" id="focus-area-speed">⚡ 속도</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="technique">
+              <span class="focus-area-text" id="focus-area-technique">🔧 자세</span>
+            </label>
+          </div>
+        </div>
+        <div class="focus-area-section">
+          <h4 id="swim-styles-title">수영 종목</h4>
+          <div class="focus-area-options">
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="freestyle">
+              <span class="focus-area-text" id="focus-area-freestyle">🏊 자유형</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="backstroke">
+              <span class="focus-area-text" id="focus-area-backstroke">🔙 배영</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="breaststroke">
+              <span class="focus-area-text" id="focus-area-breaststroke">🐸 평영</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="butterfly">
+              <span class="focus-area-text" id="focus-area-butterfly">🦋 접영</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="focus-area" value="im">
+              <span class="focus-area-text" id="focus-area-im">🔄 개인혼영</span>
+            </label>
+          </div>
+        </div>
+        <div class="focus-area-section">
+          <h4 id="equipment-title">사용 도구</h4>
+          <div class="focus-area-options">
+            <label class="focus-area-option">
+              <input type="checkbox" name="equipment" value="kickboard">
+              <span class="focus-area-text" id="equipment-kickboard">🏊‍♂️ 킥판</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="equipment" value="pullbuoy">
+              <span class="focus-area-text" id="equipment-pullbuoy">🧊 풀부이</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="equipment" value="snorkel">
+              <span class="focus-area-text" id="equipment-snorkel">🤿 스노클</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="equipment" value="paddles">
+              <span class="focus-area-text" id="equipment-paddles">🖐️ 패들</span>
+            </label>
+            <label class="focus-area-option">
+              <input type="checkbox" name="equipment" value="fins">
+              <span class="focus-area-text" id="equipment-fins">🦶 핀</span>
+            </label>
+          </div>
+        </div>
+        <span style="display: none;">layout=warm-up,main,cool-down&amp;table-structure=set,distance,description,intensity&amp;total-distance=true&amp;fixed-terms=warm-up,main,cool-down&amp;consistent-width=true&amp;consistent-table-width=true&amp;overall-description=true&amp;save-image-btn=true&amp;new-plan-btn=true</span>
+      </div>
+
+      <div class="drill-settings-icon" id="drill-settings-icon">
+        <span>⚙️</span>
+        <span class="drill-settings-text">영법별 드릴 선택</span>
+      </div>
+
+      <div class="detailed-drill-options" id="detailed-drill-options" style="display: none;">
+        <h4>자유형 (Freestyle) 드릴</h4>
+        <ul>
+          <li><input type="checkbox" name="freestyle-drill" value="catch-up"> Catch-up Drill: 팔을 번갈아가며 스트로크하는 동안 한 팔을 앞에
+            유지</li>
+          <li><input type="checkbox" name="freestyle-drill" value="fist"> Fist Drill: 주먹을 쥐고 수영하여 수중에서의 감각을 향상</li>
+          <li><input type="checkbox" name="freestyle-drill" value="one-arm"> One-arm Drill: 한 팔로만 수영하며 다른 팔은 몸 옆에 둠</li>
+          <li><input type="checkbox" name="freestyle-drill" value="finger-tip-drag"> Finger Tip Drag: 손가락 끝을 물 표면에 끌며 팔
+            회전을 연습</li>
+          <li><input type="checkbox" name="freestyle-drill" value="zipper"> Zipper Drill: 팔꿈치를 높게 유지하며 손을 몸 옆으로 끌고 올라옴
+          </li>
+          <li><input type="checkbox" name="freestyle-drill" value="sculling"> Sculling Drill: 물을 잡는 감각을 향상시키기 위해 짧은 동작
+            반복</li>
+          <li><input type="checkbox" name="freestyle-drill" value="kicking"> Kicking Drill: 킥판을 사용하여 하체 운동 집중</li>
+          <li><input type="checkbox" name="freestyle-drill" value="6-3-6"> 6-3-6 Drill: 한 팔로 6번 킥 후 3번 스트로크 반복</li>
+        </ul>
+
+        <h4>배영 (Backstroke) 드릴</h4>
+        <ul>
+          <li><input type="checkbox" name="backstroke-drill" value="single-arm"> Single-arm Backstroke: 한 팔로만 수영하여 스트로크
+            교정</li>
+          <li><input type="checkbox" name="backstroke-drill" value="double-arm"> Double-arm Backstroke: 두 팔을 동시에 움직이며 몸의
+            균형 잡기</li>
+          <li><input type="checkbox" name="backstroke-drill" value="sculling"> Sculling Drill: 물을 잡는 감각을 향상</li>
+          <li><input type="checkbox" name="backstroke-drill" value="kicking"> Kicking Drill: 킥판을 사용하여 하체 운동 집중</li>
+          <li><input type="checkbox" name="backstroke-drill" value="body-position"> Body Position Drill: 몸의 자세와 균형을 잡기
+            위한 드릴</li>
+          <li><input type="checkbox" name="backstroke-drill" value="6-3-6"> 6-3-6 Drill: 자유형과 유사하게 한 팔로 6번 킥 후 3번 스트로크
+            반복</li>
+          <li><input type="checkbox" name="backstroke-drill" value="head-lead"> Head Lead Drill: 머리를 고정하고 팔을 사용하지 않으며 몸의
+            위치 연습</li>
+          <li><input type="checkbox" name="backstroke-drill" value="rotation"> Rotation Drill: 몸의 회전을 연습하기 위해 양팔을 몸 옆에
+            두고 수영</li>
+        </ul>
+
+        <h4>평영 (Breaststroke) 드릴</h4>
+        <ul>
+          <li><input type="checkbox" name="breaststroke-drill" value="2-kick-1-pull"> 2-Kick, 1-Pull Drill: 두 번의 킥 후 한
+            번의 풀 동작을 반복</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="pull-dolphin"> Pull with Dolphin Kick: 평영 팔 동작과 돌핀
+            킥을 조합</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="kick"> Kick Drill: 킥판을 사용하여 다리 운동 집중</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="sculling"> Sculling Drill: 물을 잡는 감각을 향상</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="arms-freestyle"> Breaststroke Arms with Freestyle
+            Kick: 평영 팔 동작과 자유형 킥을 조합</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="arms-backstroke"> Breaststroke Arms with
+            Backstroke Kick: 평영 팔 동작과 배영 킥을 조합</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="body-position"> Body Position Drill: 몸의 자세와 균형을 잡기
+            위한 드릴</li>
+          <li><input type="checkbox" name="breaststroke-drill" value="underwater-pullouts"> Underwater Pullouts: 물속에서의 팔
+            동작 연습</li>
+        </ul>
+
+        <h4>접영 (Butterfly) 드릴</h4>
+        <ul>
+          <li><input type="checkbox" name="butterfly-drill" value="single-arm"> Single-arm Butterfly: 한 팔로만 수영하여 스트로크 교정
+          </li>
+          <li><input type="checkbox" name="butterfly-drill" value="kicking"> Kicking Drill: 킥판을 사용하여 돌핀 킥 연습</li>
+          <li><input type="checkbox" name="butterfly-drill" value="3-3-3"> 3-3-3 Drill: 3번의 돌핀 킥 후 3번의 팔 동작 반복</li>
+          <li><input type="checkbox" name="butterfly-drill" value="body-dolphin"> Body Dolphin Drill: 팔을 사용하지 않고 몸의 돌핀
+            동작 연습</li>
+          <li><input type="checkbox" name="butterfly-drill" value="sculling"> Sculling Drill: 물을 잡는 감각을 향상</li>
+          <li><input type="checkbox" name="butterfly-drill" value="freestyle-kick"> Butterfly with Freestyle Kick: 접영 팔
+            동작과 자유형 킥 조합</li>
+          <li><input type="checkbox" name="butterfly-drill" value="breathing"> Breathing Drill: 호흡 기술을 향상시키기 위한 드릴</li>
+          <li><input type="checkbox" name="butterfly-drill" value="breaststroke-kick"> Butterfly Arms with Breaststroke
+            Kick: 접영 팔 동작과 평영 킥 조합</li>
+        </ul>
+      </div>
+
+
+      <input type="hidden" id="selected-language" name="language" value="kr">
+      <input type="hidden" name="layout" value="warm-up|main|cool-down">
+      <input type="hidden" name="table-structure" value="set|distance|description|intensity">
+      <input type="hidden" name="total-distance" value="true">
+      <input type="hidden" name="fixed-terms" value="warm-up|main|cool-down">
+      <input type="hidden" name="consistent-width" value="true">
+      <input type="hidden" name="consistent-table-width" value="true">
+      <input type="hidden" name="overall-description" value="true">
+      <input type="hidden" name="save-image-btn" value="true">
+      <input type="hidden" name="new-plan-btn" value="true">
+
+      <button type="submit" id="submit-button" style="width: 100%;">운동 계획 생성하기</button>
+    </form>
+
+    <div class="workout-plan" id="workout-plan" style="display: none;">
+      <!-- 운동 계획 내용이 여기에 동적으로 삽입됩니다 -->
+    </div>
+
+    <div id="total-distance-validation" style="display: none;">
+      <label for="total-distance-input">전체 훈련 거리 (m):</label>
+      <input type="number" id="total-distance-input" min="0" step="50">
+      <button id="validate-distance-btn">거리 확인</button>
+    </div>
+
+    <button id="save-image-btn" style="display: none;">이미지로 저장하기</button>
+    <button id="new-plan-btn" style="display: none;">새로운 계획 만들기</button>
+  </main>
+
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script>
+    document.getElementById('workout-type').addEventListener('change', function() {
+      const timeInput = document.getElementById('time-input');
+      const distanceInput = document.getElementById('distance-input');
+      if (this.value === 'time') {
+        timeInput.style.display = 'block';
+        distanceInput.style.display = 'none';
+      } else if (this.value === 'distance') {
+        timeInput.style.display = 'none';
+        distanceInput.style.display = 'block';
+      } else {
+        timeInput.style.display = 'none';
+        distanceInput.style.display = 'none';
+      }
+    });
+
+    const translations = {
+      kr: {
+        title: "수영 운동 계획 만들기",
+        skillLevelLabel: "수영 등급:",
+        skillLevelOptionPlaceholder: "수영 등급을 선택하세요",
+        workoutTypeLabel: "운동 유형:",
+        workoutTypeOptionPlaceholder: "운동 유형을 선택하세요",
+        workoutTypeOptionTime: "시간 기준",
+        workoutTypeOptionDistance: "거리 기준",
+        workoutDurationLabel: "운동 시간 (분):",
+        workoutDistanceLabel: "운동 거리 (m):",
+        poolLengthLabel: "풀 길이 (m):",
+        poolLengthOptionPlaceholder: "풀 길이를 선택하세요",
+        focusAreaLabel: "집중 영역 (복수 선택 가능):",
+        trainingGoalsTitle: "훈련 목표",
+        focusAreaEndurance: "🏃 지구력",
+        focusAreaStrength: "💪 체력",
+        focusAreaSpeed: "⚡ 속도",
+        focusAreaTechnique: "🔧 자세",
+        swimStylesTitle: "수영 종목",
+        focusAreaFreestyle: "🏊 자유형",
+        focusAreaBackstroke: "🔙 배영",
+        focusAreaBreaststroke: "🐸 평영",
+        focusAreaButterfly: "🦋 접영",
+        focusAreaIM: "🔄 개인혼영",
+        equipmentTitle: "사용 도구",
+        equipmentKickboard: "🏊‍♂️ 킥판",
+        equipmentPullbuoy: "🧊 풀부이",
+        equipmentSnorkel: "🤿 스노클",
+        equipmentPaddles: "🖐️ 패들",
+        equipmentFins: "🦶 핀",
+        submitButton: "운동 계획 생성하기",
+        saveImageButton: "이미지로 저장하기",
+        newPlanButton: "새로운 계획 만들기",
+        totalDistanceLabel: "전체 훈련 거리 (m):",
+        validateDistanceButton: "거리 확인"
+      },
+      en: {
+        // ... (영어 번역)
+      },
+      cn: {
+        // ... (중국어 번역)
+      },
+      jp: {
+        // ... (일본어 번역)
+      }
+    };
+
+    function changeLanguage(lang) {
+      const buttons = document.querySelectorAll('.language-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const t = translations[lang];
+      
+      document.getElementById('title').textContent = t.title;
+      document.getElementById('skill-level-label').textContent = t.skillLevelLabel;
+      document.getElementById('skill-level-option-placeholder').textContent = t.skillLevelOptionPlaceholder;
+      document.getElementById('workout-type-label').textContent = t.workoutTypeLabel;
+      document.getElementById('workout-type-option-placeholder').textContent = t.workoutTypeOptionPlaceholder;
+      document.getElementById('workout-type-option-time').textContent = t.workoutTypeOptionTime;
+      document.getElementById('workout-type-option-distance').textContent = t.workoutTypeOptionDistance;
+      document.getElementById('workout-duration-label').textContent = t.workoutDurationLabel;
+      document.getElementById('workout-distance-label').textContent = t.workoutDistanceLabel;
+      document.getElementById('pool-length-label').textContent = t.poolLengthLabel;
+      document.getElementById('pool-length-option-placeholder').textContent = t.poolLengthOptionPlaceholder;
+      document.getElementById('training-goals-title').textContent = t.trainingGoalsTitle;
+      document.getElementById('focus-area-endurance').textContent = t.focusAreaEndurance;
+      document.getElementById('focus-area-strength').textContent = t.focusAreaStrength;
+      document.getElementById('focus-area-speed').textContent = t.focusAreaSpeed;
+      document.getElementById('focus-area-technique').textContent = t.focusAreaTechnique;
+      document.getElementById('swim-styles-title').textContent = t.swimStylesTitle;
+      document.getElementById('focus-area-freestyle').textContent = t.focusAreaFreestyle;
+      document.getElementById('focus-area-backstroke').textContent = t.focusAreaBackstroke;
+      document.getElementById('focus-area-breaststroke').textContent = t.focusAreaBreaststroke;
+      document.getElementById('focus-area-butterfly').textContent = t.focusAreaButterfly;
+      document.getElementById('focus-area-im').textContent = t.focusAreaIM;
+      document.getElementById('equipment-title').textContent = t.equipmentTitle;
+      document.getElementById('equipment-kickboard').textContent = t.equipmentKickboard;
+      document.getElementById('equipment-pullbuoy').textContent = t.equipmentPullbuoy;
+      document.getElementById('equipment-snorkel').textContent = t.equipmentSnorkel;
+      document.getElementById('equipment-paddles').textContent = t.equipmentPaddles;
+      document.getElementById('equipment-fins').textContent = t.equipmentFins;
+      document.getElementById('submit-button').textContent = t.submitButton;
+      document.getElementById('save-image-btn').textContent = t.saveImageButton;
+      document.getElementById('new-plan-btn').textContent = t.newPlanButton;
+      document.querySelector('label[for="total-distance-input"]').textContent = t.totalDistanceLabel;
+      document.getElementById('validate-distance-btn').textContent = t.validateDistanceButton;
+
+      document.getElementById('selected-language').value = lang;
+    }
+
+    // 체크박스 이벤트 리스너
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          this.parentElement.style.backgroundColor = '#4dd0e1';
+          this.parentElement.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+        } else {
+          this.parentElement.style.backgroundColor = '#e0f7fa';
+          this.parentElement.style.boxShadow = 'none';
+        }
+      });
+    });
+
+    // 폼 제출 이벤트
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const searchParams = new URLSearchParams(formData);
+      
+      // Generate 페이지로 이동
+      window.location.href = '/generate?' + searchParams.toString();
+    });
+
+    // 이미지로 저장하기 버튼 이벤트
+    document.getElementById('save-image-btn').addEventListener('click', function() {
+      html2canvas(document.getElementById('workout-plan')).then(function(canvas) {
+        var link = document.createElement('a');
+        link.download = 'workout-plan.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    });
+
+    // 새로운 계획 만들기 버튼 이벤트
+    document.getElementById('new-plan-btn').addEventListener('click', function() {
+      window.history.back();
+    });
+
+    // 상세 드릴 설정 아이콘 이벤트
+    document.getElementById('drill-settings-icon').addEventListener('click', function() {
+      var detailedOptions = document.getElementById('detailed-drill-options');
+      if (detailedOptions.style.display === 'none' || detailedOptions.style.display === '') {
+        detailedOptions.style.display = 'block';
+      } else {
+        detailedOptions.style.display = 'none';
+      }
+      this.classList.toggle('active');
+    });
+  </script></body></html>
